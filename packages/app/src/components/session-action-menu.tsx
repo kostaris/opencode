@@ -13,6 +13,7 @@ export function SessionActionMenu(props: {
   onShare: () => void
   onExport: () => void
   onArchive: () => void
+  onDuplicate?: () => void
   onDelete: () => void
 }) {
   const language = useLanguage()
@@ -32,6 +33,9 @@ export function SessionActionMenu(props: {
           }}
         >
           <MenuV2.Item onSelect={props.onRename}>{language.t("common.rename")}</MenuV2.Item>
+          <Show when={props.onDuplicate}>
+            <MenuV2.Item onSelect={props.onDuplicate!}>{language.t("session.header.open.duplicate")}</MenuV2.Item>
+          </Show>
           <Show when={props.shareEnabled}>
             <MenuV2.Item onSelect={props.onShare}>{language.t("session.share.action.share")}...</MenuV2.Item>
           </Show>

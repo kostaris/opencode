@@ -11,6 +11,7 @@ export type SessionMutationClient = {
     delete(input: { sessionID: string; directory: string }): Promise<unknown>
     share(input: { sessionID: string }): Promise<{ data?: Session | null }>
     unshare(input: { sessionID: string }): Promise<{ data?: Session | null }>
+    fork(input: { sessionID: string; messageID?: string }): Promise<{ data?: Session | SessionInfo; error?: unknown } | Session | SessionInfo>
   }
 }
 
@@ -74,6 +75,15 @@ export function createSessionMutation(input: { client: SessionMutationClient; se
       await input.client.session.delete({ sessionID: session.id, directory: session.directory })
       removeSession(input.serverSync, session.id, session.directory, ids)
       return ids
+    },
+    async fork(sessionID: string, messageID?: string) {
+      const result = await input.client.session.fork({ sessionID, ...(messageID ? { messageID } : {}) })
+      if (result && typeof result === "object" && "error" in result && result.error && !("id" in result)) {
+        throw result.error
+      }
+      const raw =
+        result && typeof result === "object" && "data" in result && result.data ? result.data : (result as Session | SessionInfo)
+      return applySession(input.serverSync, normalizeSessionInfo(raw), "session.created")
     },
     async publish(session: Session) {
       const data = (await input.client.session.share({ sessionID: session.id })).data

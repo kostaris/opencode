@@ -62,6 +62,7 @@ export type HomeSessionsViewProps = {
   onShareSession: (session: Session) => Promise<string | undefined>
   onUnshareSession: (session: Session) => Promise<boolean>
   onExportSession: (session: Session) => Promise<void>
+  onDuplicateSession: (session: Session) => void
   onDeleteSession: (session: Session) => Promise<boolean>
   shareEnabled: Accessor<boolean>
   onSetHoverTarget: (element: HTMLElement) => void
@@ -574,6 +575,7 @@ function HomeSessionRow(props: HomeSessionsViewProps & { record: HomeSessionReco
             setState("menuOpen", false)
           }}
           onExport={() => props.onExportSession(props.record.session)}
+          onDuplicate={() => props.onDuplicateSession(props.record.session)}
           onArchive={() => props.onArchiveSession(props.record.session)}
           onDelete={() =>
             dialog.show(() => (

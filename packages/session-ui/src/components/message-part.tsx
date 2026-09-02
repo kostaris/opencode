@@ -207,7 +207,7 @@ export interface MessagePartProps {
 
 function MessageActionButton(
   props: Pick<ComponentProps<"button">, "disabled" | "onMouseDown" | "onClick" | "aria-label"> & {
-    icon: "check" | "copy" | "reset"
+    icon: "check" | "copy" | "reset" | "fork"
     label: JSX.Element
     useV2?: boolean
   },
@@ -1261,6 +1261,20 @@ export function UserMessageDisplay(props: {
       .finally(() => setState("busy", false))
   }
 
+  const fork = () => {
+    const act = props.actions?.fork
+    if (!act || busy()) return
+    setState("busy", true)
+    void Promise.resolve()
+      .then(() =>
+        act({
+          sessionID: props.message.sessionID,
+          messageID: props.message.id,
+        }),
+      )
+      .finally(() => setState("busy", false))
+  }
+
   const renderAttachments = () => (
     <Show when={attachments().length > 0}>
       <div data-slot="user-message-attachments">
@@ -1370,6 +1384,20 @@ export function UserMessageDisplay(props: {
                 revert()
               }}
               aria-label={i18n.t("ui.message.revertMessage")}
+            />
+          </Show>
+          <Show when={props.actions?.fork}>
+            <MessageActionButton
+              icon="fork"
+              label={i18n.t("ui.message.forkMessage")}
+              useV2={props.useV2Actions}
+              disabled={!!busy()}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={(event) => {
+                event.stopPropagation()
+                fork()
+              }}
+              aria-label={i18n.t("ui.message.forkMessage")}
             />
           </Show>
           <Show when={text()}>

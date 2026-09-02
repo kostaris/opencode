@@ -5,6 +5,7 @@ import { useDialog } from "@opencode-ai/ui/context/dialog"
 import { useQuery } from "@tanstack/solid-query"
 import { DateTime } from "luxon"
 import { type Accessor, createEffect, createMemo, createRoot, type JSX, startTransition } from "solid-js"
+import { createStore, reconcile, type SetStoreFunction } from "solid-js/store"
 import { useCommand } from "@/context/command"
 import {
   loadHomeSessionIndex,
@@ -27,6 +28,7 @@ import {
   sessionExportFilename,
 } from "@/utils/session-export"
 import { base64Encode } from "@opencode-ai/core/util/encode"
+import { duplicateSession } from "@/utils/session-duplicate"
 import type { HomeController } from "./home-controller"
 
 const HOME_SESSION_LIMIT = 64
@@ -300,6 +302,19 @@ export function createHomeSessionsController(home: HomeController) {
             description: errorMessage(cause, language.t("toast.session.export.failed.description")),
           })
         }
+      },
+      duplicate: (session: Session) => {
+        const conn = home.server.focused()
+        const ctx = home.server.focusedContext()
+        if (!conn || !ctx) return
+        return duplicateSession({
+          sdk: () => ctx.sdk.ensureDirSdkContext(session.directory),
+          navigate,
+          sessionID: session.id,
+          serverKey: base64Encode(ServerConnection.key(conn)),
+           errorTitle: language.t("common.requestFailed"),
+           serverSync: ctx.sync,
+         })
       },
       delete: async (session: Session): Promise<boolean> => {
         const ctx = home.server.focusedContext()

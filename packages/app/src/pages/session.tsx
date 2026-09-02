@@ -98,6 +98,7 @@ import { Identifier } from "@/utils/id"
 import { diffs as list } from "@/utils/diffs"
 import { Persist, persisted } from "@/utils/persist"
 import { extractPromptFromParts } from "@/utils/prompt"
+import { forkSession } from "@/utils/session-fork"
 import { formatServerError, isLocalSessionNotFoundError, isSessionNotFoundError } from "@/utils/server-errors"
 import { legacySessionHref, requireServerKey, sessionHref } from "@/utils/session-route"
 import { useUsageExceededDialogs } from "./session/usage-exceeded-dialogs"
@@ -1923,7 +1924,21 @@ export default function Page() {
     download()
   }
 
-  const actions = { revert, openAttachment }
+  const fork = (input: { sessionID: string; messageID: string }) => {
+    return forkSession({
+      sdk,
+      navigate,
+      language,
+      prompt,
+      parts: sync().data.part,
+      sessionID: input.sessionID,
+       messageID: input.messageID,
+       serverSync: serverSync(),
+       serverKey: params.serverKey,
+    })
+  }
+
+  const actions = { revert, openAttachment, fork }
 
   createEffect(() => {
     const sessionID = params.id

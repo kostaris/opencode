@@ -18,6 +18,7 @@ function fixture(input: { fail?: boolean; shareURL?: string } = {}) {
       delete: async () => {
         if (input.fail) throw new Error("failed")
       },
+      fork: async () => ({ data: { ...session, id: "ses_2", location: { directory: "/project" } } }),
       share: async () => ({ data: input.shareURL ? { ...session, share: { url: input.shareURL } } : undefined }),
       unshare: async () => {
         if (input.fail) throw new Error("failed")

@@ -31,6 +31,7 @@ export function HomeSessions(props: {
       onShareSession={props.sessions.session.share}
       onUnshareSession={props.sessions.session.unshare}
       onExportSession={props.sessions.session.exportSession}
+      onDuplicateSession={props.sessions.session.duplicate}
       onDeleteSession={props.sessions.session.delete}
       shareEnabled={props.sessions.session.shareEnabled}
       onSetHoverTarget={props.scroll.viewport.setHoverTarget}

@@ -2,6 +2,7 @@ import { Component, createMemo } from "solid-js"
 import { useNavigate, useParams } from "@solidjs/router"
 import { useSync } from "@/context/sync"
 import { useSDK } from "@/context/sdk"
+import { useServerSync } from "@/context/server-sync"
 import { usePrompt } from "@/context/prompt"
 import { useDialog } from "@opencode-ai/ui/context/dialog"
 import { Dialog } from "@opencode-ai/ui/dialog"
@@ -11,6 +12,7 @@ import { extractPromptFromParts } from "@/utils/prompt"
 import type { TextPart as SDKTextPart } from "@opencode-ai/sdk/v2/client"
 import { base64Encode } from "@opencode-ai/core/util/encode"
 import { useLanguage } from "@/context/language"
+import { createSessionMutation } from "@/utils/session-mutation"
 
 interface ForkableMessage {
   id: string
@@ -27,6 +29,7 @@ export const DialogFork: Component = () => {
   const navigate = useNavigate()
   const sync = useSync()
   const sdk = useSDK()
+  const serverSync = useServerSync()
   const prompt = usePrompt()
   const dialog = useDialog()
   const language = useLanguage()
@@ -68,8 +71,8 @@ export const DialogFork: Component = () => {
     })
     const dir = base64Encode(sdk().directory)
 
-    sdk()
-      .api.session.fork({ sessionID, messageID: item.id })
+    createSessionMutation({ client: sdk().client, serverSync: serverSync() })
+      .fork(sessionID, item.id)
       .then((forked) => {
         dialog.close()
         prompt.set(restored, undefined, { dir, id: forked.id })

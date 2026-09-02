@@ -74,6 +74,7 @@ import { notifySessionTabsRemoved } from "@/components/titlebar-session-events"
 import { sessionRemovalIDs } from "@/utils/session-delete"
 import { createSessionMutation } from "@/utils/session-mutation"
 import { sessionTitle } from "@/utils/session-title"
+import { duplicateSession } from "@/utils/session-duplicate"
 import { scheduleConnectedMeasure } from "./measure"
 import { observeElementOffsetReconnectAware } from "./observe-element-offset"
 import { createTimelineProjection } from "./projection"
@@ -1434,8 +1435,25 @@ export function MessageTimeline(props: {
                                 >
                                   <DropdownMenu.ItemLabel>{language.t("common.rename")}</DropdownMenu.ItemLabel>
                                 </DropdownMenu.Item>
-                                <Show when={shareEnabled()}>
-                                  <DropdownMenu.Item
+                                   <DropdownMenu.Item
+                                     onSelect={() => {
+                                       setTitle("menuOpen", false)
+                                       duplicateSession({
+                                         sdk,
+                                         navigate,
+                                         sessionID: id,
+                                         serverKey: params.serverKey,
+                                          errorTitle: language.t("common.requestFailed"),
+                                          serverSync: serverSync(),
+                                        })
+                                     }}
+                                   >
+                                   <DropdownMenu.ItemLabel>
+                                     {language.t("session.header.open.duplicate")}
+                                   </DropdownMenu.ItemLabel>
+                                 </DropdownMenu.Item>
+                                 <Show when={shareEnabled()}>
+                                   <DropdownMenu.Item
                                     onSelect={() => {
                                       setTitle({ pendingShare: true, menuOpen: false })
                                     }}
@@ -1505,6 +1523,17 @@ export function MessageTimeline(props: {
                           onShare={() => setTitle({ pendingShare: true, menuOpen: false })}
                           onExport={() => exportSession(id)}
                           onArchive={() => void sessionArchive.archive(id)}
+                          onDuplicate={() => {
+                            setTitle("menuOpen", false)
+                            duplicateSession({
+                              sdk,
+                              navigate,
+                              sessionID: id,
+                              serverKey: params.serverKey,
+                              errorTitle: language.t("common.requestFailed"),
+                              serverSync: serverSync(),
+                            })
+                          }}
                           onDelete={() => dialog.show(() => (
                                       <SessionDeleteDialog
                                         name={sessionTitle(sync().session.get(id)?.title) ?? language.t("command.session.new")}
